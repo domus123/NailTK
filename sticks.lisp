@@ -2,17 +2,20 @@
 (defpackage :nailtk
   (:use :ltk :cl :common-lisp :cl-user)
   (:export :stick
-	   :save-frame))
+	   :save-frame
+	   :save-ntk-file))
 (in-package :nailtk)
 
 (defparameter xx 0)
 (defparameter yy 0)
 (defparameter scolor 'red)
-(defparameter *xsize* 600)
-(defparameter *ysize* 400)
+(defparameter *xsize* 900)
+(defparameter *ysize* 800)
 (defparameter *items* '())
-(defparameter *output-file* nil)
+(defparameter *output-file* "default")
 (defparameter *version* 0.01)
+(defparameter *ntk* 0) ;;flag for saving file as .ntk
+(defparameter *img* 0) ;;flag for saving file as .png
 
 (defun rotatelist()
   (when (consp *items*)
@@ -33,37 +36,68 @@
     (set-coords canvas rect
 		(list xx yy xx1 yy1 )) ))
 
+(defun save-ntk-file ()
+  (with-open-file (stream (format nil "~a.ntk" *output-file*)
+			  :direction :output
+			  :if-exists :supersede
+			  :if-does-not-exist :create)
+    (format stream "~a" *items*)))
+
 (defun save-frame ()
   (with-ltk ()
-    (let* ( (sf (make-instance 'frame))
-	   (input-name (make-instance 'text
+    (let* ( (sf (make-instance 'frame ))
+	    (check (make-instance 'frame))
+	    (input-name (make-instance 'text
 				       :width 20
-				       :height 1
-				       :master sf))
+				      :height 1
+				      :master sf))
 	    (save-button (make-instance 'button
 				      :text "Save"
 				      :master sf
 				      :command
-				      (lambda () (let ( (output (text input-name)))
-						   (setf *output-file* output
-							 *exit-mainloop* t))) ))
+				      (lambda () (when (text input-name)
+						   (let ( (output (text input-name)))
+						     (setf *output-file* output
+							   *exit-mainloop* t)))) ))
+	    (ext (make-instance 'button
+				:text "Close"
+				:master sf
+				:command (lambda () (setf *exit-mainloop* t))))
 	    (f-name (make-instance 'label
-				  :text "File Name:"
+				   :text "File Name:"
 				  :master sf))
-	   (scanvas (make-instance 'canvas
+	    (save-as(make-instance 'label
+					:text "Save as:"
+					:master check))
+	    (scanvas (make-instance 'canvas
 				   :width 200
-				   :height 10)))
-	   
+				   :height 10))
+	    (check-ntk (make-instance 'check-button
+				      :master check
+				      :text "Ntk File"
+				      :command (lambda (e)
+						 (setf *ntk* e))))
+	    (check-img (make-instance 'check-button
+				      :text "Png file"
+				      :master check
+				      :command (lambda (e)
+						 (setf *img* e)) ))) 
       (pack scanvas)
+      (pack check :anchor :nw)
       (pack sf :anchor :nw)
       (pack f-name :side :left)
       (pack input-name :side :left)
-      (pack save-button :side :right))))
-
+      (pack ext :side :bottom)
+      (pack save-button :side :bottom)
+      (pack save-as :side :left )
+      (pack check-ntk :side :left)
+      (pack check-img :side :left))))
+      
 (defun stick ()
   (with-ltk ()
 	    (let* (  (f (make-instance 'frame))
                      (g (make-instance 'frame))	  
+		     (menu (make-instance 'frame))
 		     (bt1 (make-instance 'button :text "Blue"
 				       :master f
 				       :command (lambda ()
@@ -98,8 +132,11 @@
 					     (itemconfigure canvas
 							    (car *items*)
 						     :outline :black))) ))
+		     (load (make-instance 'button :text "Load"
+					  :master menu
+					  :command (lambda () )))
 		     (ext (make-instance 'button :text "Exit"
-					 :master f
+					 :master menu
 					 :command
 					 (lambda ()
 					   (setf *exit-mainloop* t)
@@ -115,18 +152,24 @@
 								 (elem (car rem))
 								  (posix '(0 0 0 0)))
 							    (set-coords canvas elem posix)))) ))
-
 		     (save (make-instance 'button :text "Save"
-					  :master f
+					  :master menu
 					  :command (lambda () (nailtk::save-frame)
-							   (if (null *output-file*) (format t "File name missing")
-							       (when (postscript canvas *output-file*)
-								 (format t "~a CREATED" *output-file* ))) )))
+							   (cond ( (and (zerop *img*) (equal 1 *ntk*)) ;;check ntk| not check img
+								  (nailtk::save-ntk-file))
+								 ( (and (zerop *ntk*) (equal 1 *img*)) ;;check img| not check ntk
+								  (postscript canvas *output-file*))
+								 ( (and (equal 1 *ntk*) (equal 1 *img*)) ;; check both
+								  (progn (nailtk::save-ntk-file)
+									 (postscript canvas *output-file*)))
+								 ( t (format t "~&None~%")))
+							   (setf *ntk* 0
+								 *img* 0))))
 		     (pt1 (make-instance 'button :text "Up"
-				       :master g
-				       :command
-				       (lambda ()
-					 (change-value canvas 0 -1 0 -1)) ))
+					 :master g
+					 :command
+					 (lambda ()
+					   (change-value canvas 0 -1 0 -1)) ))
 		     (pt2 (make-instance 'button :text "Down"
 				       :master g
 				       :command
@@ -165,6 +208,7 @@
 					 (change-value canvas 0 0 0 +1)) ))
 		     (down nil))
 	      (pack f :anchor :nw)
+	      (pack g :anchor :nw)
 	      (pack bt1 :side :left)
 	      (pack bt2 :side :left)
 	      (pack bt3 :side :left)
@@ -172,8 +216,10 @@
 	      (pack bt5 :side :left)
 	      (pack bt6 :side :left)
 	      (pack dlt :side :left)
-	      (pack save :side :left)
+	      (pack menu :anchor :nw)
 	      (pack ext :side :left)
+	      (pack save :side :left)
+	      (pack load :side :left)
 	      (pack mause)
 	      (pack pt1 :side :left)
 	      (pack pt2 :side :left)
@@ -182,8 +228,7 @@
 	      (pack pt5 :side :left)
 	      (pack pt6 :side :left)
 	      (pack pt7 :side :left)
-	      (pack pt8)
-	      (pack f :anchor :nw)	      
+	      (pack pt8)	      
 	      (configure f :borderwidth 3)
 	      (configure f :relief :sunken)
               (configure g :borderwidth 3)
@@ -249,3 +294,4 @@
   (format t "~&------------------------------------------~%")
   (finish-output t)
   (nailtk::stick))
+
