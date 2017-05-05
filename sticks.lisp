@@ -22,6 +22,17 @@
 (defun snp (x)
   (* (floor (/ x 10)) 10))
 
+(defun change-value (canvas xh yh xs ys)
+  (let* ( (rxy (pop *items*))
+	 (rect (car rxy))
+	  (xx (+ (cadr rxy) xs))
+	  (yy (+ (caddr rxy) ys))
+	  (xx1 (+ (cadddr rxy) xh))
+	  (yy1 (+ (cadddr (cdr rxy)) yh)))
+    (push (list rect xx yy xx1 yy1) *items*)
+    (set-coords canvas rect
+		(list xx yy xx1 yy1 )) ))
+
 (defun save-frame ()
   (with-ltk ()
     (let* ( (sf (make-instance 'frame))
@@ -114,115 +125,45 @@
 		     (pt1 (make-instance 'button :text "Up"
 				       :master g
 				       :command
-			     (lambda ()
-				(let* ( (rxy (pop *items*))
-					(rect (car rxy))
-					(xx (cadr rxy))
-					(yy (- (caddr rxy) 1))
-					(xx1 (cadddr rxy))
-					(yy1 (- (cadddr (cdr rxy)) 1) ))
-				  (push (list rect xx yy xx1 yy1)
-					*items*)
-					(set-coords canvas rect
-					   (list xx yy xx1 yy1 )) ))))
+				       (lambda ()
+					 (change-value canvas 0 -1 0 -1)) ))
 		     (pt2 (make-instance 'button :text "Down"
 				       :master g
 				       :command
 				       (lambda ()
-				(let* ( (rxy (pop *items*))
-					(rect (car rxy))
-					(xx (cadr rxy))
-					(yy (+ (caddr rxy) 1))
-					(xx1 (cadddr rxy))
-					(yy1 (+ (cadddr (cdr rxy)) 1) ))
-				  (push (list rect xx yy xx1 yy1)
-					*items*)
-					(set-coords canvas rect
-					   (list xx yy xx1 yy1 )) ))))
+					 (change-value canvas 0 1 0 1)) ))
 		     (pt3 (make-instance 'button :text "Left"
 				       :master g
 				       :command
 				       (lambda ()
-				(let* ( (rxy (pop *items*))
-					(rect (car rxy))
-					(xx (- (cadr rxy) 1))
-					(yy (caddr rxy))
-					(xx1 (- (cadddr rxy) 1))
-					(yy1 (cadddr (cdr rxy)) ))
-				  (push (list rect xx yy xx1 yy1)
-					*items*)
-					(set-coords canvas rect
-					    (list xx yy xx1 yy1 )) ))))
+					 (change-value canvas -1 0 -1 0)) ))
+					
                      (pt4 (make-instance 'button :text "Right"
 				       :master g
 				       :command
 				       (lambda ()
-				(let* ( (rxy (pop *items*))
-					(rect (car rxy))
-					(xx (+ (cadr rxy) 1))
-					(yy (caddr rxy))
-					(xx1 (+ (cadddr rxy) 1))
-					(yy1 (cadddr (cdr rxy))  ))
-				  (push (list rect xx yy xx1 yy1)
-					*items*)
-					(set-coords canvas rect
-					    (list xx yy xx1 yy1 )) ))))
+					 (change-value canvas 1 0 1 0)) ))
 		     (pt5 (make-instance 'button :text "+width"
 				       :master g
 				       :command
 				       (lambda ()
-				(let* ( (rxy (pop *items*))
-					(rect (car rxy))
-					(xx (cadr rxy))
-					(yy (caddr rxy))
-					(xx1 (+ (cadddr rxy) 1))
-					(yy1 (cadddr (cdr rxy))  ))
-				  (push (list rect xx yy xx1 yy1)
-					*items*)
-					(set-coords canvas rect
-					   (list xx yy xx1 yy1 )) ))))
-		      (pt6 (make-instance 'button :text "-width"
+					 (change-value canvas 0 0 -1 0)) ))
+		     (pt6 (make-instance 'button :text "-width"
 				       :master g
 				       :command
 				       (lambda ()
-				(let* ( (rxy (pop *items*))
-					(rect (car rxy))
-					(xx (cadr rxy))
-					(yy (caddr rxy))
-					(xx1 (- (cadddr rxy) 1))
-					(yy1 (cadddr (cdr rxy))  ))
-				  (push (list rect xx yy xx1 yy1)
-					*items*)
-					(set-coords canvas rect
-					    (list xx yy xx1 yy1 )) ))))
+					 (change-value canvas 0 0 +1 0)) ))
 		      (pt7 (make-instance 'button :text "+height"
 				       :master g
 				       :command
 				       (lambda ()
-				(let* ( (rxy (pop *items*))
-					(rect (car rxy))
-					(xx (cadr rxy))
-					(yy (caddr rxy))
-					(xx1 (cadddr rxy))
-					(yy1 (+ (cadddr (cdr rxy)) 1)  ))
-				  (push (list rect xx yy xx1 yy1)
-					*items*)
-					(set-coords canvas rect
-					    (list xx yy xx1 yy1 )) ))))
-		      (pt8 (make-instance 'button :text "-height"
+					 (change-value canvas 0 0 0 -1)) ))
+		     (pt8 (make-instance 'button :text "-height"
 				       :master g
 				       :command
 				       (lambda ()
-			    (let* ( (rxy (pop *items*))
-				    (rect (car rxy))
-				    (xx (cadr rxy))
-				    (yy (caddr rxy))
-				    (xx1 (cadddr rxy))
-				    (yy1 (- (cadddr (cdr rxy)) 1)  ))
-			      (push (list rect xx yy xx1 yy1) *items*)
-				 (set-coords canvas rect
-				     (list xx yy xx1 yy1))) )))
-                    (down nil))
+					 (change-value canvas 0 0 0 +1)) ))
+		     (down nil))
 	      (pack f :anchor :nw)
 	      (pack bt1 :side :left)
 	      (pack bt2 :side :left)
@@ -299,8 +240,6 @@
 	     (setf (ltk:text mause)
 		 (format nil "~ax,~ay" (event-x evt)
 			 (event-y evt)))  )) )))
-
-
 (let ()
   (format t "~&-----------------NailTK-------------------")
   (format t "~&Natural and artificial laboratory")
