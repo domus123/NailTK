@@ -126,12 +126,12 @@
 			        :command (lambda ()
 					   (when (consp *items*)
 					     (itemconfigure canvas
-						  (car *items*)
+						  (caar *items*)
 						  :outline :white)
 					     (rotatelist)
 					     (itemconfigure canvas
-							    (car *items*)
-						     :outline :black))) ))
+							    (caar *items*)
+						     :outline :cyan))) ))
 		     (load (make-instance 'button :text "Load"
 					  :master menu
 					  :command (lambda () )))
@@ -262,18 +262,21 @@
 					 xx1 yy1 )) )))
 		 (cond ( (equal scolor 'red)
 			 (itemconfigure canvas rect :fill :red)
-			 (itemconfigure canvas rect :outline :red))
+			 (itemconfigure canvas rect :outline :cyan))
 		       ( (equal scolor 'blue)
 			 (itemconfigure canvas rect :fill :blue)
-			 (itemconfigure canvas rect :outline :blue))
+			 (itemconfigure canvas rect :outline :cyan))
 		       ( (equal scolor 'yellow)
 			 (itemconfigure canvas rect :fill :yellow)
-			 (itemconfigure canvas rect :outline :yellow))
+			 (itemconfigure canvas rect :outline :cyan))
 		       ( (equal scolor 'black)
 			 (itemconfigure canvas rect :fill :black)
-			 (itemconfigure canvas rect :outline :black))
+			 (itemconfigure canvas rect :outline :cyan))
 		       (t  (itemconfigure canvas rect :fill :gray)
-			   (itemconfigure canvas rect :outline :gray)))
+			   (itemconfigure canvas rect :outline :cyan)))
+                 (when *items*
+		   (itemconfigure canvas (caar *items*) :outline :white))
+				  
                  (push (list rect xx yy xx1 yy1) *items*)
 		 (setf xx 0 yy 0)   )) ))
      (bind canvas "<ButtonRelease-2>"
