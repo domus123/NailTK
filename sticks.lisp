@@ -1,7 +1,8 @@
 (ql:quickload "ltk")
 (defpackage :nailtk
   (:use :ltk :cl :common-lisp :cl-user)
-  (:export :stick))
+  (:export :stick
+	   :save-frame))
 (in-package :nailtk)
 
 (defparameter xx 0)
@@ -10,6 +11,8 @@
 (defparameter *xsize* 600)
 (defparameter *ysize* 400)
 (defparameter *items* '())
+(defparameter *output-file* nil)
+(defparameter *version* 0.01)
 
 (defun rotatelist()
   (when (consp *items*)
@@ -18,6 +21,33 @@
 
 (defun snp (x)
   (* (floor (/ x 10)) 10))
+
+(defun save-frame ()
+  (with-ltk ()
+    (let* ( (sf (make-instance 'frame))
+	   (input-name (make-instance 'text
+				       :width 20
+				       :height 1
+				       :master sf))
+	    (save-button (make-instance 'button
+				      :text "Save"
+				      :master sf
+				      :command
+				      (lambda () (let ( (output (text input-name)))
+						   (setf *output-file* output
+							 *exit-mainloop* t))) ))
+	    (f-name (make-instance 'label
+				  :text "File Name:"
+				  :master sf))
+	   (scanvas (make-instance 'canvas
+				   :width 200
+				   :height 10)))
+	   
+      (pack scanvas)
+      (pack sf :anchor :nw)
+      (pack f-name :side :left)
+      (pack input-name :side :left)
+      (pack save-button :side :right))))
 
 (defun stick ()
   (with-ltk ()
@@ -61,18 +91,26 @@
 					 :master f
 					 :command
 					 (lambda ()
-					   (setf *exit-mainloop* t)) ))
+					   (setf *exit-mainloop* t)
+					   (format t "Thank you!~%")) ))
 		     (mause (make-instance 'entry
 					   :text "00, 00"
 					   :width 8
 					   :master f))
-		     (dlt (make-instance 'button :text "delete"
+		     (dlt (make-instance 'button :text "Delete"
 					 :master f
 					 :command (lambda () (when (consp *items*)
 							  (let* ( (rem (pop *items*))
 								 (elem (car rem))
 								  (posix '(0 0 0 0)))
 							    (set-coords canvas elem posix)))) ))
+
+		     (save (make-instance 'button :text "Save"
+					  :master f
+					  :command (lambda () (nailtk::save-frame)
+							   (if (null *output-file*) (format t "File name missing")
+							       (when (postscript canvas *output-file*)
+								 (format t "~a CREATED" *output-file* ))) )))
 		     (pt1 (make-instance 'button :text "Up"
 				       :master g
 				       :command
@@ -193,6 +231,7 @@
 	      (pack bt5 :side :left)
 	      (pack bt6 :side :left)
 	      (pack dlt :side :left)
+	      (pack save :side :left)
 	      (pack ext :side :left)
 	      (pack mause)
 	      (pack pt1 :side :left)
@@ -211,7 +250,6 @@
      (pack canvas)
      (pack g :after canvas)
      (pack f :after g)
-    
      (bind canvas "<ButtonPress-1>"
            (lambda (evt)
              (setf down t)
@@ -262,4 +300,13 @@
 		 (format nil "~ax,~ay" (event-x evt)
 			 (event-y evt)))  )) )))
 
-(nailtk::stick)
+
+(let ()
+  (format t "~&-----------------NailTK-------------------")
+  (format t "~&Natural and artificial laboratory")
+  (format t "~&Federal University of Uberlândia")
+  (format t "~&Vers : ~a" *version*)
+  (format t "~&May/2017")
+  (format t "~&------------------------------------------~%")
+  (finish-output t)
+  (nailtk::stick))

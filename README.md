@@ -13,7 +13,6 @@
 
 ```lisp
  sbcl --load sticks.lisp
- (nailtk::stick)
 
 ```
 
