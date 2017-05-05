@@ -98,23 +98,23 @@
 	    (let* (  (f (make-instance 'frame))
                      (g (make-instance 'frame))	  
 		     (menu (make-instance 'frame))
-		     (bt1 (make-instance 'button :text "Blue"
+		     (bt1 (make-instance 'button :text "nDiff"
 				       :master f
 				       :command (lambda ()
-						  (setf scolor 'blue))))
-		     (bt2 (make-instance 'button :text "Red"
+						  (setf scolor 'green))))
+		     (bt2 (make-instance 'button :text "Poly"
 				       :master f
 				       :command (lambda ()
 						  (setf scolor 'red))))
-		     (bt3 (make-instance 'button :text "Gray"
+		     (bt3 (make-instance 'button :text "Metal"
 				       :master f
 				       :command (lambda ()
 						  (setf scolor 'gray))))
-		     (bt4 (make-instance 'button :text "Black"
+		     (bt4 (make-instance 'button :text "Connect"
 				       :master f
 				       :command (lambda ()
 						  (setf scolor 'black))))
-		     (bt5 (make-instance 'button :text "Yellow"
+		     (bt5 (make-instance 'button :text "pDiff"
 				       :master f
 				       :command (lambda ()
 						  (setf scolor 'yellow))))
@@ -147,24 +147,26 @@
 					   :master f))
 		     (dlt (make-instance 'button :text "Delete"
 					 :master f
-					 :command (lambda () (when (consp *items*)
-							  (let* ( (rem (pop *items*))
-								 (elem (car rem))
-								  (posix '(0 0 0 0)))
-							    (set-coords canvas elem posix)))) ))
+					 :command
+				    (lambda () (when (consp *items*)
+						  (let* ( (rem (pop *items*))
+							  (elem (car rem))
+							  (posix '(0 0 0 0)))
+						      (set-coords canvas elem posix)))) ))
 		     (save (make-instance 'button :text "Save"
 					  :master menu
-					  :command (lambda () (nailtk::save-frame)
-							   (cond ( (and (zerop *img*) (equal 1 *ntk*)) ;;check ntk| not check img
-								  (nailtk::save-ntk-file))
-								 ( (and (zerop *ntk*) (equal 1 *img*)) ;;check img| not check ntk
-								  (postscript canvas *output-file*))
-								 ( (and (equal 1 *ntk*) (equal 1 *img*)) ;; check both
-								  (progn (nailtk::save-ntk-file)
-									 (postscript canvas *output-file*)))
-								 ( t (format t "~&None~%")))
-							   (setf *ntk* 0
-								 *img* 0))))
+					  :command
+				  (lambda () (nailtk::save-frame)
+				       (cond ( (and (zerop *img*) (equal 1 *ntk*)) ;;check ntk| not check img
+					       (nailtk::save-ntk-file))
+					     ( (and (zerop *ntk*) (equal 1 *img*)) ;;check img| not check ntk
+					       (postscript canvas *output-file*))
+						     ( (and (equal 1 *ntk*) (equal 1 *img*)) ;; check both
+						       (progn (nailtk::save-ntk-file)
+						       (postscript canvas *output-file*)))
+					     ( t (format t "~&None~%")))
+						 (setf *ntk* 0
+						       *img* 0))))
 		     (pt1 (make-instance 'button :text "Up"
 					 :master g
 					 :command
@@ -189,23 +191,58 @@
 		     (pt5 (make-instance 'button :text "+width"
 				       :master g
 				       :command
-				       (lambda ()
-					 (change-value canvas 0 0 -1 0)) ))
+			    (lambda ()
+				(let* ( (rxy (pop *items*))
+					(rect (car rxy))
+					(xx (cadr rxy))
+					(yy (caddr rxy))
+					(xx1 (+ (cadddr rxy) 1))
+					(yy1 (cadddr (cdr rxy))  ))
+				  (push (list rect xx yy xx1 yy1)
+					*items*)
+					(set-coords canvas rect
+					   (list xx yy xx1 yy1 )) ))))
 		     (pt6 (make-instance 'button :text "-width"
 				       :master g
 				       :command
 				       (lambda ()
-					 (change-value canvas 0 0 +1 0)) ))
+				(let* ( (rxy (pop *items*))
+					(rect (car rxy))
+					(xx (cadr rxy))
+					(yy (caddr rxy))
+					(xx1 (- (cadddr rxy) 1))
+					(yy1 (cadddr (cdr rxy))  ))
+				  (push (list rect xx yy xx1 yy1)
+					*items*)
+					(set-coords canvas rect
+					    (list xx yy xx1 yy1 )) ))))
 		      (pt7 (make-instance 'button :text "+height"
 				       :master g
 				       :command
-				       (lambda ()
-					 (change-value canvas 0 0 0 -1)) ))
+				 (lambda ()
+				  (let* ( (rxy (pop *items*))
+				  	  (rect (car rxy))
+					  (xx (cadr rxy))
+					  (yy (caddr rxy))
+					  (xx1 (cadddr rxy))
+					  (yy1 (+ (cadddr (cdr rxy)) 1)  ))
+				  (push (list rect xx yy xx1 yy1)
+					*items*)
+					(set-coords canvas rect
+					    (list xx yy xx1 yy1 )) ))))
 		     (pt8 (make-instance 'button :text "-height"
 				       :master g
 				       :command
-				       (lambda ()
-					 (change-value canvas 0 0 0 +1)) ))
+			(lambda ()
+			    (let* ( (rxy (pop *items*))
+				    (rect (car rxy))
+				    (xx (cadr rxy))
+				    (yy (caddr rxy))
+				    (xx1 (cadddr rxy))
+				    (yy1 (- (cadddr (cdr rxy)) 1)  ))
+			      (push (list rect xx yy xx1 yy1) *items*)
+				 (set-coords canvas rect
+				     (list xx yy xx1 yy1))) )))
 		     (down nil))
 	      (pack f :anchor :nw)
 	      (pack g :anchor :nw)
@@ -263,8 +300,8 @@
 		 (cond ( (equal scolor 'red)
 			 (itemconfigure canvas rect :fill :red)
 			 (itemconfigure canvas rect :outline :cyan))
-		       ( (equal scolor 'blue)
-			 (itemconfigure canvas rect :fill :blue)
+		       ( (equal scolor 'green)
+			 (itemconfigure canvas rect :fill :green)
 			 (itemconfigure canvas rect :outline :cyan))
 		       ( (equal scolor 'yellow)
 			 (itemconfigure canvas rect :fill :yellow)
