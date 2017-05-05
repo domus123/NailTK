@@ -2,9 +2,9 @@
 
 
 <h4> Dependencies </h4>
-     * Steel bank Common Lisp (sbcl)
-     * Quick-lisp
-     * Ltk (will be downloaded when loaded if you have quick-lisp installed)
+    <p> * Steel bank Common Lisp (sbcl)
+    <p> * Quick-lisp
+    <p> * Ltk (will be downloaded when loaded if you have quick-lisp installed)
      
 
 
