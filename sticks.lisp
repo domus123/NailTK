@@ -2,11 +2,7 @@
 (defpackage :nailtk
   (:use :ltk :cl :common-lisp :cl-user)
   (:export :stick))
-
-
-
 (in-package :nailtk)
-;;(in-package :ltk)
 
 (defparameter xx 0)
 (defparameter yy 0)
@@ -18,7 +14,7 @@
 (defun rotatelist()
   (when (consp *items*)
     (let ( (xx (pop *items*)))
-      (setf *items* (append *items* (list xx)) )) ))
+      (nconc *items* (cons xx nil)) )))
 
 (defun snp (x)
   (* (floor (/ x 10)) 10))
@@ -70,6 +66,13 @@
 					   :text "00, 00"
 					   :width 8
 					   :master f))
+		     (dlt (make-instance 'button :text "delete"
+					 :master f
+					 :command (lambda () (when (consp *items*)
+							  (let* ( (rem (pop *items*))
+								 (elem (car rem))
+								  (posix '(0 0 0 0)))
+							    (set-coords canvas elem posix)))) ))
 		     (pt1 (make-instance 'button :text "Up"
 				       :master g
 				       :command
@@ -189,6 +192,7 @@
 	      (pack bt4 :side :left)
 	      (pack bt5 :side :left)
 	      (pack bt6 :side :left)
+	      (pack dlt :side :left)
 	      (pack ext :side :left)
 	      (pack mause)
 	      (pack pt1 :side :left)
@@ -196,9 +200,10 @@
 	      (pack pt3 :side :left)
 	      (pack pt4 :side :left)
 	      (pack pt5 :side :left)
-	      (pack  pt6 :side :left)
+	      (pack pt6 :side :left)
 	      (pack pt7 :side :left)
 	      (pack pt8)
+	      (pack f :anchor :nw)	      
 	      (configure f :borderwidth 3)
 	      (configure f :relief :sunken)
               (configure g :borderwidth 3)
@@ -254,7 +259,7 @@
      (bind canvas "<Motion>"
 	   (lambda(evt)
 	     (setf (ltk:text mause)
-		 (format nil "~a, ~a" (event-x evt)
+		 (format nil "~ax,~ay" (event-x evt)
 			 (event-y evt)))  )) )))
 
-
+(nailtk::stick)
