@@ -13,6 +13,10 @@
 
 ```lisp
  sbcl --load sticks.lisp
+ ;;For create an executable
+ (nailtk::compile-ntk)
+ ;;For running inside sbcl
+ (nailtk::main)
 
 ```
 

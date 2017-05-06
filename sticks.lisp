@@ -3,7 +3,9 @@
   (:use :ltk :cl :common-lisp :cl-user)
   (:export :stick
 	   :save-frame
-	   :save-ntk-file))
+	   :save-ntk-file
+	   :main
+	   :compile-ntk))
 (in-package :nailtk)
 
 (defparameter xx 0)
@@ -325,7 +327,7 @@
 	     (setf (ltk:text mause)
 		 (format nil "~ax,~ay" (event-x evt)
 			 (event-y evt)))  )) )))
-(let ()
+(defun main() 
   (format t "~&-----------------NailTK-------------------")
   (format t "~&Natural and artificial laboratory")
   (format t "~&Federal University of Uberlândia")
@@ -335,3 +337,5 @@
   (finish-output t)
   (nailtk::stick))
 
+(defun compile-ntk ()
+  (sb-ext:save-lisp-and-die "nailtk" :executable t :toplevel #'main))
