@@ -15,7 +15,7 @@
 (defparameter *output-file* "default")
 (defparameter *version* 0.01)
 (defparameter *ntk* 0) ;;flag for saving file as .ntk
-(defparameter *img* 0) ;;flag for saving file as .png
+(defparameter *img* 0) ;;flag for saving file as image
 
 (defun rotatelist()
   (when (consp *items*)
@@ -78,7 +78,7 @@
 				      :command (lambda (e)
 						 (setf *ntk* e))))
 	    (check-img (make-instance 'check-button
-				      :text "Png file"
+				      :text "Image file"
 				      :master check
 				      :command (lambda (e)
 						 (setf *img* e)) ))) 
