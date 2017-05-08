@@ -5,7 +5,9 @@
 	   :save-frame
 	   :save-ntk-file
 	   :main
-	   :compile-ntk))
+	   :compile-ntk
+	   :read-ntk-file))
+
 (in-package :nailtk)
 
 (defparameter xx 0)
@@ -18,6 +20,13 @@
 (defparameter *version* 0.01)
 (defparameter *ntk* 0) ;;flag for saving file as .ntk
 (defparameter *img* 0) ;;flag for saving file as image
+
+(defun read-ntk-file (&optional (filename nil))
+  (when (not (null filename))
+    (with-open-file (stream filename)
+      (loop for lines = (read stream nil :eof)
+	 until (equal lines :eof)
+	 collect lines)) ))
 
 (defun rotatelist()
   (when (consp *items*)
@@ -39,11 +48,12 @@
 		(list xx yy xx1 yy1 )) ))
 
 (defun save-ntk-file ()
-  (with-open-file (stream (format nil "~a.ntk" *output-file*)
+  (let ( (fname (format nil "~a.ntk" (string *output-file*)) ))
+    (with-open-file (stream fname
 			  :direction :output
 			  :if-exists :supersede
 			  :if-does-not-exist :create)
-    (format stream "~a" *items*)))
+    (format stream "~a" *items*)) ))
 
 (defun save-frame ()
   (with-ltk ()
@@ -57,10 +67,10 @@
 				      :text "Save"
 				      :master sf
 				      :command
-				      (lambda () (when (text input-name)
-						   (let ( (output (text input-name)))
-						     (setf *output-file* output
-							   *exit-mainloop* t)))) ))
+				      (lambda () 
+					(let ( (output (string-trim '(#\space  #\newline #\tab) (text input-name)) ))
+					    (setf *output-file* output
+						  *exit-mainloop* t)))))
 	    (ext (make-instance 'button
 				:text "Close"
 				:master sf
@@ -85,6 +95,7 @@
 				      :command (lambda (e)
 						 (setf *img* e)) ))) 
       (pack scanvas)
+      (setf (text input-name) "dflt")
       (pack check :anchor :nw)
       (pack sf :anchor :nw)
       (pack f-name :side :left)
@@ -134,9 +145,17 @@
 					     (itemconfigure canvas
 							    (caar *items*)
 						     :outline :cyan))) ))
-		     (load (make-instance 'button :text "Load"
+		     (load (make-instance 'button :text "Load" ;; Not working yet
 					  :master menu
-					  :command (lambda () )))
+					  :command (lambda ()#|  (loop for elem in (car (read-ntk-file "dflt.ntk"))
+								  do
+								    (let* ( (item (car elem))
+									   (posix (cdr elem)))
+								      (format t "Item -> ~a|" item)
+								      (format t "Posix -> ~a~%" posix)
+								      (format t "Cons -> ~a~%" (cons item posix))
+								      (push (cons item posix) *items*)
+						     (set-coords canvas item posix))) |#)))
 		     (ext (make-instance 'button :text "Exit"
 					 :master menu
 					 :command
@@ -327,6 +346,12 @@
 	     (setf (ltk:text mause)
 		 (format nil "~ax,~ay" (event-x evt)
 			 (event-y evt)))  )) )))
+
+
+
+
+
+
 (defun main() 
   (format t "~&-----------------NailTK-------------------")
   (format t "~&Natural and artificial laboratory")
