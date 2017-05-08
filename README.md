@@ -20,3 +20,12 @@
 
 ```
 
+
+<h6> How to set window size </h6>
+```lisp
+ sbcl --load sticks.lisp
+ ;;(nailtk::config xsize ysize)
+ (nailtk::config 300 400) ;;This need to be done only once, if you dont he will load with default values.
+ (nailtk::main)
+
+```
