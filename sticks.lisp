@@ -160,13 +160,16 @@
 					  :command (lambda () (setf scolor 'black)
 						     (loop for elem in (car (read-ntk-file "dflt.ntk"))
 								  do
-								    (let* ( (item (car elem))
-									   (posix (cdr elem)))
-								      (format t "Item -> ~a|" item)
-								      (format t "Posix -> ~a~%" posix)
-								      (format t "Cons -> ~a~%" (cons item posix))
-								      (push (cons item posix) *items*)
-						     (set-coords canvas item posix))) )))
+							  (let* ( (item (car elem))
+								 (posix (cdr elem))
+								  (xx (car posix))
+								  (yy (cadr posix))
+								  (xx1 (caddr posix))
+								  (yy1 (cadddr posix)))
+							    (push (cons item posix) *items*)
+							    (create-rectangle canvas xx yy xx1 yy1)))
+						     (format t "Items --> ~a~%" *items*)) ))
+		     					    ;;(set-coords canvas item posix))) )))
 		     (ext (make-instance 'button :text "Exit"
 					 :master menu
 					 :command
