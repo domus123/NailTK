@@ -9,28 +9,39 @@
 	   :read-ntk-file
 	   :config))
 
+
 (in-package :nailtk)
 
 (defparameter xx 0)
 (defparameter yy 0)
 (defparameter scolor 'red)
-(defparameter *xsize* 400)
-(defparameter *ysize* 500)
+(defparameter *xsize* 600)
+(defparameter *ysize* 600)
 (defparameter *items* '())
 (defparameter *output-file* "default")
-(defparameter *version* 0.01)
+(defparameter *version* 0.03)
 (defparameter *ntk* 0) ;;flag for saving file as .ntk
 (defparameter *img* 0) ;;flag for saving file as image
 
 (defun config (xsize ysize)
-  (with-open-file (stream ".config"
-			  :direction :output
-			  :if-exists :supersede
-			  :if-does-not-exist :create)
-		  (format stream "(~a . ~a)" xsize ysize))
-  (format t "Xsize seted to -> ~a~%" xsize)
-  (format t "Ysize seted to -> ~a~%" ysize))
+  (when (and (not (null xsize)) (not (null ysize)))
+    (with-open-file (stream ".config"
+			    :direction :output
+			    :if-exists :supersede
+			    :if-does-not-exist :create)
+      (format stream "(~a . ~a)" xsize ysize))
+    (format t "Xsize seted to -> ~a~%" xsize)
+    (format t "Ysize seted to -> ~a~%" ysize)))
 
+(defun read-config ()
+  (with-open-file (stream ".config")
+	(let ( (lst (read stream)))
+	  (when (not (null lst))
+	    (let ((xsize (car lst))
+		  (ysize (cdr lst)))
+	      (setf *xsize* xsize
+		    *ysize* ysize)) ))))
+  
 (defun read-ntk-file (&optional (filename nil))
   (when (not (null filename))
     (with-open-file (stream filename)
@@ -361,17 +372,14 @@
 		 (format nil "~ax,~ay" (event-x evt)
 			 (event-y evt)))  )) )))
 
-
-
-
-
-
 (defun main() 
   (format t "~&-----------------NailTK-------------------")
   (format t "~&Natural and artificial laboratory")
   (format t "~&Federal University of Uberlândia")
   (format t "~&Vers : ~a" *version*)
   (format t "~&May/2017")
+  (read-config)
+  (format t "~&Window size ~ax, ~ay~%" *xsize* *ysize*)
   (format t "~&------------------------------------------~%")
   (finish-output t)
   (nailtk::stick))
