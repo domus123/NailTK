@@ -6,20 +6,30 @@
 	   :save-ntk-file
 	   :main
 	   :compile-ntk
-	   :read-ntk-file))
+	   :read-ntk-file
+	   :config))
 
 (in-package :nailtk)
 
 (defparameter xx 0)
 (defparameter yy 0)
 (defparameter scolor 'red)
-(defparameter *xsize* 900)
-(defparameter *ysize* 800)
+(defparameter *xsize* 400)
+(defparameter *ysize* 500)
 (defparameter *items* '())
 (defparameter *output-file* "default")
 (defparameter *version* 0.01)
 (defparameter *ntk* 0) ;;flag for saving file as .ntk
 (defparameter *img* 0) ;;flag for saving file as image
+
+(defun config (xsize ysize)
+  (with-open-file (stream ".config"
+			  :direction :output
+			  :if-exists :supersede
+			  :if-does-not-exist :create)
+		  (format stream "(~a . ~a)" xsize ysize))
+  (format t "Xsize seted to -> ~a~%" xsize)
+  (format t "Ysize seted to -> ~a~%" ysize))
 
 (defun read-ntk-file (&optional (filename nil))
   (when (not (null filename))
@@ -147,7 +157,8 @@
 						     :outline :cyan))) ))
 		     (load (make-instance 'button :text "Load" ;; Not working yet
 					  :master menu
-					  :command (lambda ()#|  (loop for elem in (car (read-ntk-file "dflt.ntk"))
+					  :command (lambda () (setf scolor 'black)
+						     (loop for elem in (car (read-ntk-file "dflt.ntk"))
 								  do
 								    (let* ( (item (car elem))
 									   (posix (cdr elem)))
@@ -155,7 +166,7 @@
 								      (format t "Posix -> ~a~%" posix)
 								      (format t "Cons -> ~a~%" (cons item posix))
 								      (push (cons item posix) *items*)
-						     (set-coords canvas item posix))) |#)))
+						     (set-coords canvas item posix))) )))
 		     (ext (make-instance 'button :text "Exit"
 					 :master menu
 					 :command
