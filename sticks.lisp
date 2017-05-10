@@ -8,10 +8,7 @@
 	   :compile-ntk
 	   :read-ntk-file
 	   :config))
-
-
 (in-package :nailtk)
-
 (defparameter xx 0)
 (defparameter yy 0)
 (defparameter scolor 'red)
@@ -63,8 +60,9 @@
 	  (xx (+ (cadr rxy) xs))
 	  (yy (+ (caddr rxy) ys))
 	  (xx1 (+ (cadddr rxy) xh))
-	  (yy1 (+ (cadddr (cdr rxy)) yh)))
-    (push (list rect xx yy xx1 yy1) *items*)
+	  (yy1 (+ (cadddr (cdr rxy)) yh))
+	  (color (car (last rxy)) ))
+    (push (list rect xx yy xx1 yy1 color) *items*)
     (set-coords canvas rect
 		(list xx yy xx1 yy1 )) ))
 
@@ -176,11 +174,26 @@
 								  (xx (car posix))
 								  (yy (cadr posix))
 								  (xx1 (caddr posix))
-								  (yy1 (cadddr posix)))
+								  (yy1 (cadddr posix))
+								  (color (string (car (last posix))))
+								  (rect (create-rectangle canvas xx yy xx1 yy1)))
 							    (push (cons item posix) *items*)
-							    (create-rectangle canvas xx yy xx1 yy1)))
-						     (format t "Items --> ~a~%" *items*)) ))
-		     					    ;;(set-coords canvas item posix))) )))
+							    (format t "color -> ~a~%" color)
+							    (cond ( (equal "RED" color)
+								   (itemconfigure canvas rect :fill :red)
+								    (itemconfigure canvas rect :outline :cyan))
+								  ( (equal "GREEN" color)
+								   (itemconfigure canvas rect :fill :green)
+								    (itemconfigure canvas rect :outline :cyan))
+								  ( (equal "YELLOW" color)
+								   (itemconfigure canvas rect :fill :yellow)
+								    (itemconfigure canvas rect :outline :cyan))
+								  ( (equal "GRAY" 'gray)
+								    (format t "GRAY~%")
+								    (itemconfigure canvas rect :fill :gray)
+								    (itemconfigure canvas rect :outline :cyan))
+								  (t  (itemconfigure canvas rect :fill :black)
+								      (itemconfigure canvas rect :outline :cyan))) ))) ))		     
 		     (ext (make-instance 'button :text "Exit"
 					 :master menu
 					 :command
@@ -198,7 +211,7 @@
 						  (let* ( (rem (pop *items*))
 							  (elem (car rem))
 							  (posix '(0 0 0 0)))
-						      (set-coords canvas elem posix)))) ))
+						    (set-coords canvas elem posix)))) ))
 		     (save (make-instance 'button :text "Save"
 					  :master menu
 					  :command
@@ -243,8 +256,9 @@
 					(xx (cadr rxy))
 					(yy (caddr rxy))
 					(xx1 (+ (cadddr rxy) 1))
-					(yy1 (cadddr (cdr rxy))  ))
-				  (push (list rect xx yy xx1 yy1)
+					(yy1 (cadddr (cdr rxy))  )
+					(color (car (last rxy)) ))
+				  (push (list rect xx yy xx1 yy1 color)
 					*items*)
 					(set-coords canvas rect
 					   (list xx yy xx1 yy1 )) ))))
@@ -257,8 +271,9 @@
 					(xx (cadr rxy))
 					(yy (caddr rxy))
 					(xx1 (- (cadddr rxy) 1))
-					(yy1 (cadddr (cdr rxy))  ))
-				  (push (list rect xx yy xx1 yy1)
+					(yy1 (cadddr (cdr rxy))  )
+					(color (car (last rxy)) ))
+				  (push (list rect xx yy xx1 yy1 color)
 					*items*)
 					(set-coords canvas rect
 					    (list xx yy xx1 yy1 )) ))))
@@ -271,8 +286,10 @@
 					  (xx (cadr rxy))
 					  (yy (caddr rxy))
 					  (xx1 (cadddr rxy))
-					  (yy1 (+ (cadddr (cdr rxy)) 1)  ))
-				  (push (list rect xx yy xx1 yy1)
+					  (yy1 (+ (cadddr (cdr rxy)) 1))
+					  (color (car (last rxy)) ))
+					    
+				  (push (list rect xx yy xx1 yy1 color)
 					*items*)
 					(set-coords canvas rect
 					    (list xx yy xx1 yy1 )) ))))
@@ -285,9 +302,10 @@
 				    (xx (cadr rxy))
 				    (yy (caddr rxy))
 				    (xx1 (cadddr rxy))
-				    (yy1 (- (cadddr (cdr rxy)) 1)  ))
-			      (push (list rect xx yy xx1 yy1) *items*)
-				 (set-coords canvas rect
+				    (yy1 (- (cadddr (cdr rxy)) 1))
+				    (color (car (last rxy)) ))
+			      (push (list rect xx yy xx1 yy1 color ) *items*)
+			      (set-coords canvas rect
 				     (list xx yy xx1 yy1))) )))
 		     (down nil))
 	      (pack f :anchor :nw)
@@ -360,7 +378,7 @@
                  (when *items*
 		   (itemconfigure canvas (caar *items*) :outline :white))
 				  
-                 (push (list rect xx yy xx1 yy1) *items*)
+                 (push (list rect xx yy xx1 yy1 scolor) *items*)
 		 (setf xx 0 yy 0)   )) ))
      (bind canvas "<ButtonRelease-2>"
 	   (lambda(evt)
@@ -371,7 +389,6 @@
 	     (setf (ltk:text mause)
 		 (format nil "~ax,~ay" (event-x evt)
 			 (event-y evt)))  )) )))
-
 (defun main() 
   (format t "~&-----------------NailTK-------------------")
   (format t "~&Natural and artificial laboratory")
@@ -381,6 +398,7 @@
   (read-config)
   (format t "~&Window size ~ax, ~ay~%" *xsize* *ysize*)
   (format t "~&------------------------------------------~%")
+  (setf *items* nil)
   (finish-output t)
   (nailtk::stick))
 
