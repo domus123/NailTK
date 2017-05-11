@@ -178,7 +178,6 @@
 								  (color (string (car (last posix))))
 								  (rect (create-rectangle canvas xx yy xx1 yy1)))
 							    (push (cons item posix) *items*)
-							    (format t "color -> ~a~%" color)
 							    (cond ( (equal "RED" color)
 								   (itemconfigure canvas rect :fill :red)
 								    (itemconfigure canvas rect :outline :cyan))
@@ -186,14 +185,13 @@
 								   (itemconfigure canvas rect :fill :green)
 								    (itemconfigure canvas rect :outline :cyan))
 								  ( (equal "YELLOW" color)
-								   (itemconfigure canvas rect :fill :yellow)
+								    (itemconfigure canvas rect :fill :yellow)
 								    (itemconfigure canvas rect :outline :cyan))
-								  ( (equal "GRAY" 'gray)
-								    (format t "GRAY~%")
+								  ( (equal "GRAY" color)
 								    (itemconfigure canvas rect :fill :gray)
 								    (itemconfigure canvas rect :outline :cyan))
-								  (t  (itemconfigure canvas rect :fill :black)
-								      (itemconfigure canvas rect :outline :cyan))) ))) ))		     
+								  (t   (itemconfigure canvas rect :fill :black)
+								       (itemconfigure canvas rect :outline :cyan))) ))) ))
 		     (ext (make-instance 'button :text "Exit"
 					 :master menu
 					 :command
