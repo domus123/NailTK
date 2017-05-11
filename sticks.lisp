@@ -7,7 +7,9 @@
 	   :main
 	   :compile-ntk
 	   :read-ntk-file
-	   :config))
+	   :config
+	   :load-frame))
+
 (in-package :nailtk)
 (defparameter xx 0)
 (defparameter yy 0)
@@ -73,6 +75,33 @@
 			  :if-exists :supersede
 			  :if-does-not-exist :create)
     (format stream "~a" *items*)) ))
+
+(defun load-frame()
+  (with-ltk ()
+	    (let* ( (sf (make-instance 'frame))
+		    (file-name (make-instance 'label
+					      :text "File name: "
+					      :master sf))
+		    (input-name (make-instance 'text
+					       :width 20
+					       :height 1
+					       :master sf))
+		    (load-button (make-instance 'button
+						:text "Load"
+						:width 5
+						:master sf
+						:command (lambda () (format t "Pressed~%")) ))
+		    (exit-button (make-instance 'button
+						:text "Close"
+						:width 5
+						:master sf
+						:command (lambda () (setf *exit-mainloop* t)) )))
+				 
+	      (pack sf :anchor :nw)
+	      (pack file-name :side :left)
+	      (pack input-name :side :left)
+	      (pack load-button :side :left)
+	      (pack exit-button :side :left)) ))
 
 (defun save-frame ()
   (with-ltk ()
@@ -166,7 +195,8 @@
 						     :outline :cyan))) ))
 		     (load (make-instance 'button :text "Load" ;; Not working yet
 					  :master menu
-					  :command (lambda () (setf scolor 'black)
+					  :command (lambda () 
+						     (nailtk::load-frame)
 						     (loop for elem in (car (read-ntk-file "dflt.ntk"))
 								  do
 							  (let* ( (item (car elem))
