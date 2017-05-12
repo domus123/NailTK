@@ -33,16 +33,16 @@
 
 <h5> How to save your files in NailTK </h5>
 
-# When running nailtk you'll have two ways to save your file
+ <p> When running nailtk you'll have  two formats to save  your file :
  <p> *Nailtk file (.ntk)
  <p> *Postcript image
 
 
 When saving as ntk file, you can use load function later to keep working from where you stop.
-When saving in postcript, you have a image.
+When saving in postscript, you will have a image.
 
 To save, just click in the save button on the top of the screen, it will open a new window.
-You can enter the file name, we will do the extension for you.
+Then you can enter the file name, we will do the extension for you.
 
 ex: input -> dflt
     output-file -> dflt.ntk
@@ -51,7 +51,7 @@ ex: input -> dflt
 
 Just click on the load button, a new window will show up.
 Enter the file name, we will try to open it.
-If the file could not be founded, a message will pop up in your terminal.
+If the file could not be found, a message will pop up in your terminal.
 
 
     		
