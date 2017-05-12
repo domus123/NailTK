@@ -90,7 +90,11 @@
 						:text "Load"
 						:width 5
 						:master sf
-						:command (lambda () (format t "Pressed~%")) ))
+						:command (lambda () (let ( (file-name (string-trim '(#\newline #\space #\tab)
+												   (text input-name)) ))
+								      (setf *output-file* file-name
+									    *exit-mainloop* t))) ))
+								      
 		    (exit-button (make-instance 'button
 						:text "Close"
 						:width 5
@@ -197,31 +201,33 @@
 					  :master menu
 					  :command (lambda () 
 						     (nailtk::load-frame)
-						     (loop for elem in (car (read-ntk-file "dflt.ntk"))
-								  do
-							  (let* ( (item (car elem))
-								 (posix (cdr elem))
-								  (xx (car posix))
-								  (yy (cadr posix))
-								  (xx1 (caddr posix))
-								  (yy1 (cadddr posix))
-								  (color (string (car (last posix))))
-								  (rect (create-rectangle canvas xx yy xx1 yy1)))
-							    (push (cons item posix) *items*)
-							    (cond ( (equal "RED" color)
-								   (itemconfigure canvas rect :fill :red)
-								    (itemconfigure canvas rect :outline :cyan))
-								  ( (equal "GREEN" color)
-								   (itemconfigure canvas rect :fill :green)
-								    (itemconfigure canvas rect :outline :cyan))
-								  ( (equal "YELLOW" color)
-								    (itemconfigure canvas rect :fill :yellow)
-								    (itemconfigure canvas rect :outline :cyan))
-								  ( (equal "GRAY" color)
-								    (itemconfigure canvas rect :fill :gray)
-								    (itemconfigure canvas rect :outline :cyan))
-								  (t   (itemconfigure canvas rect :fill :black)
-								       (itemconfigure canvas rect :outline :cyan))) ))) ))
+						     (handler-case (loop for elem in (car (read-ntk-file *output-file*))
+									  do
+									(let* ( (item (car elem))
+									       (posix (cdr elem))
+										    (xx (car posix))
+										(yy (cadr posix))
+										(xx1 (caddr posix))
+										(yy1 (cadddr posix))
+										(color (string (car (last posix))))
+										(rect (create-rectangle canvas xx yy xx1 yy1)))
+									  (push (cons item posix) *items*)
+									  (cond ( (equal "RED" color)
+										 (itemconfigure canvas rect :fill :red)
+										  (itemconfigure canvas rect :outline :cyan))
+										( (equal "GREEN" color)
+										 (itemconfigure canvas rect :fill :green)
+										      (itemconfigure canvas rect :outline :cyan))
+										( (equal "YELLOW" color)
+										 (itemconfigure canvas rect :fill :yellow)
+										  (itemconfigure canvas rect :outline :cyan))
+										( (equal "GRAY" color)
+										 (itemconfigure canvas rect :fill :gray)
+										  (itemconfigure canvas rect :outline :cyan))
+										(t   (itemconfigure canvas rect :fill :black)
+										     (itemconfigure canvas rect :outline :cyan))) ))
+						       (error (e) (declare (ignore e))
+							      (format t "Could not load the file ~a~%" *output-file*))))))
 		     (ext (make-instance 'button :text "Exit"
 					 :master menu
 					 :command
@@ -417,6 +423,7 @@
 	     (setf (ltk:text mause)
 		 (format nil "~ax,~ay" (event-x evt)
 			 (event-y evt)))  )) )))
+
 (defun main() 
   (format t "~&-----------------NailTK-------------------")
   (format t "~&Natural and artificial laboratory")
